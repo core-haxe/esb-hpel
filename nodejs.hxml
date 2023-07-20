@@ -1,0 +1,19 @@
+--js ../../build/hpel-core.js
+
+--library promises
+--library hscript
+
+--class-path .
+--class-path ../../core/esb-core
+--class-path ../../core/esb-logging
+--class-path ../../core/esb-config
+--class-path ../../common/esb-common
+
+-D no-deprecation-warnings
+-D hpel-core-impl
+-D shallow-expose
+
+--dce full
+
+--macro include('hpel.core')
+--macro include('esb.core.bodies', false)

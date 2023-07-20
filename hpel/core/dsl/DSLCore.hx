@@ -1,0 +1,135 @@
+package hpel.core.dsl;
+
+import promises.Promise;
+import esb.core.Message;
+import esb.core.bodies.RawBody;
+import haxe.Constraints;
+import esb.common.Uri;
+
+#if !hpel_core_impl
+
+@:jsRequire("./hpel-core.js", "hpel.core.dsl.DSLCore")
+extern class DSLCore {    
+    public function new();
+    public function from(uri:Uri):DSLCore;
+    public function to(uri:Uri):DSLCore;
+    public function log(message:String):DSLCore;
+    public function when(condition:String):DSLCore;
+    public function choice():DSLCore;
+    public function otherwise():DSLCore;
+    public function convertTo(cls:Class<Dynamic>):DSLCore;
+    public function script(data:String):DSLCore;
+    public function end():DSLCore;
+    public function start():Void;
+    public function process(cls:IProcess):DSLCore;
+    public function execute(handler:Message<RawBody>->Promise<Message<RawBody>>):DSLCore;
+}
+
+#else
+
+@:expose
+@:native("hpel.core.dsl.DSLCore")
+class DSLCore {    
+    private var _currentStep:hpel.core.steps.StepCommon = null;
+    private var _parentDSL:DSLCore = null;
+
+    public function new() {
+        if (currentStep() == null) {
+            _currentStep = new hpel.core.steps.StepCommon();
+        }
+    }
+
+    public function from(uri:Uri):DSLCore {
+        var fromStep = new hpel.core.steps.From(uri);
+        currentStep().addChild(fromStep);
+        return this;
+    }
+
+    public function to(uri:Uri):DSLCore {
+        var toStep = new hpel.core.steps.To(uri);
+        currentStep().addChild(toStep);
+        return this;
+    }
+
+    public function log(message:String):DSLCore {
+        var logStep = new hpel.core.steps.Log(message);
+        currentStep().addChild(logStep);
+        return this;
+    }
+
+    public function when(condition:String):DSLCore {
+        var whenStep = new hpel.core.steps.When(condition);
+        currentStep().addChild(whenStep);
+
+        var branch = new DSLCore();
+        branch._currentStep = whenStep;
+        branch._parentDSL = this;
+        return branch;
+    }
+
+    public function choice():DSLCore {
+        var choiceStep = new hpel.core.steps.Choice();
+        currentStep().addChild(choiceStep);
+
+        var branch = new DSLCore();
+        branch._currentStep = choiceStep;
+        branch._parentDSL = this;
+        return branch;
+    }
+
+    public function otherwise():DSLCore {
+        var otherwiseStep = new hpel.core.steps.Otherwise();
+        currentStep().addChild(otherwiseStep);
+
+        var branch = new DSLCore();
+        branch._currentStep = otherwiseStep;
+        branch._parentDSL = this;
+        return branch;
+    }
+
+    /*
+    @:generic
+    public function convertTo<F:Constructible<Void->Void> & RawBody>(cls:Class<F>):DSLCore {
+        var convertToStep = new hpel.core.steps.ConvertTo<F>(cls);
+        currentStep().addChild(convertToStep);
+        return this;
+    }
+    */
+    public function convertTo(cls:Class<Dynamic>):DSLCore {
+        var convertToStep = new hpel.core.steps.ConvertTo(cls);
+        currentStep().addChild(convertToStep);
+        return this;
+    }
+
+    public function script(data:String):DSLCore {
+        var scriptStep = new hpel.core.steps.Script(data);
+        currentStep().addChild(scriptStep);
+        return this;
+    }
+
+    public function process(cls:IProcess):DSLCore {
+        var processStep = new hpel.core.steps.Process(cls);
+        currentStep().addChild(processStep);
+        return this;
+    }
+
+    public function execute(handler:Message<RawBody>->Promise<Message<RawBody>>):DSLCore {
+        var executeStep = new hpel.core.steps.Execute(handler);
+        currentStep().addChild(executeStep);
+        return this;
+    }
+
+    private function currentStep():hpel.core.steps.StepCommon {
+        return _currentStep;
+    }
+
+    public function end():DSLCore {
+        return this._parentDSL;
+    }
+
+    public function start() {
+        
+    }
+}
+
+#end
