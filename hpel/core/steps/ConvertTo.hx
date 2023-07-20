@@ -6,9 +6,9 @@ import promises.Promise;
 import esb.core.Message;
 
 class ConvertTo extends StepCommon {
-    private var cls:Class<Dynamic> = null;
+    private var cls:Class<RawBody> = null;
     
-    public function new(cls:Class<Dynamic>) {
+    public function new(cls:Class<RawBody>) {
         super();
         this.cls = cls;
     }

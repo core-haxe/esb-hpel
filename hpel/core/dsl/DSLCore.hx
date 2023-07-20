@@ -17,12 +17,13 @@ extern class DSLCore {
     public function when(condition:String):DSLCore;
     public function choice():DSLCore;
     public function otherwise():DSLCore;
-    public function convertTo(cls:Class<Dynamic>):DSLCore;
+    public function convertTo(cls:Class<RawBody>):DSLCore;
     public function script(data:String):DSLCore;
     public function end():DSLCore;
     public function start():Void;
     public function process(cls:IProcess):DSLCore;
     public function execute(handler:Message<RawBody>->Promise<Message<RawBody>>):DSLCore;
+    public function body(value:String, convertTo:Class<RawBody> = null):DSLCore;
 }
 
 #else
@@ -87,15 +88,7 @@ class DSLCore {
         return branch;
     }
 
-    /*
-    @:generic
-    public function convertTo<F:Constructible<Void->Void> & RawBody>(cls:Class<F>):DSLCore {
-        var convertToStep = new hpel.core.steps.ConvertTo<F>(cls);
-        currentStep().addChild(convertToStep);
-        return this;
-    }
-    */
-    public function convertTo(cls:Class<Dynamic>):DSLCore {
+    public function convertTo(cls:Class<RawBody>):DSLCore {
         var convertToStep = new hpel.core.steps.ConvertTo(cls);
         currentStep().addChild(convertToStep);
         return this;
@@ -116,6 +109,12 @@ class DSLCore {
     public function execute(handler:Message<RawBody>->Promise<Message<RawBody>>):DSLCore {
         var executeStep = new hpel.core.steps.Execute(handler);
         currentStep().addChild(executeStep);
+        return this;
+    }
+
+    public function body(value:String, convertTo:Class<RawBody> = null):DSLCore {
+        var bodyStep = new hpel.core.steps.Body(value, convertTo);
+        currentStep().addChild(bodyStep);
         return this;
     }
 
