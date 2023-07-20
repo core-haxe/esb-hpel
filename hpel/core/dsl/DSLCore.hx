@@ -24,6 +24,8 @@ extern class DSLCore {
     public function process(cls:IProcess):DSLCore;
     public function execute(handler:Message<RawBody>->Promise<Message<RawBody>>):DSLCore;
     public function body(value:String, convertTo:Class<RawBody> = null):DSLCore;
+    public function property(name:String, value:Any):DSLCore;
+    public function header(name:String, value:Any):DSLCore;
 }
 
 #else
@@ -115,6 +117,18 @@ class DSLCore {
     public function body(value:String, convertTo:Class<RawBody> = null):DSLCore {
         var bodyStep = new hpel.core.steps.Body(value, convertTo);
         currentStep().addChild(bodyStep);
+        return this;
+    }
+
+    public function property(name:String, value:Any):DSLCore {
+        var propertyStep = new hpel.core.steps.Property(name, value);
+        currentStep().addChild(propertyStep);
+        return this;
+    }
+
+    public function header(name:String, value:Any):DSLCore {
+        var headerStep = new hpel.core.steps.Header(name, value);
+        currentStep().addChild(headerStep);
         return this;
     }
 
