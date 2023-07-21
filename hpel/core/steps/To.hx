@@ -16,11 +16,22 @@ class To extends StepCommon {
 
     private override function executeInternal(message:Message<RawBody>):Promise<{message:Message<RawBody>, continueBranchExecution:Bool}> {
         return new Promise((hpelResolve, hpelReject) -> {
-            Bus.to(interpolateUri(uri), message).then(result -> {
-                hpelResolve({message: result, continueBranchExecution: true});
-            }, error -> {
-                trace("error", error);
-            });
+            var toUri = interpolateUri(uri);
+            if (toUri.prefix == "direct") {
+                hpel.core.dsl.Route.executeDirect(toUri, message).then(result -> {
+                    hpelResolve({message: result, continueBranchExecution: true});
+                }, error -> {
+                    trace("error", error);
+                    hpelReject(error);
+                });
+            } else {
+                Bus.to(toUri, message).then(result -> {
+                    hpelResolve({message: result, continueBranchExecution: true});
+                }, error -> {
+                    trace("error", error);
+                    hpelReject(error);
+                });
+            }
         });
     }
 }

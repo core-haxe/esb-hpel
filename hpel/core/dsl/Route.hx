@@ -25,25 +25,47 @@ class Route extends DSLCore {
         route = new hpel.core.steps.Route(this.context);
     }
 
+    // TODO: should be static? Context based?
+    private static var directRoutes:Map<String, Route> = [];
     public override function start() {
         var firstStep = @:privateAccess route.children[0];
         if (firstStep is hpel.core.steps.From) {
             var fromStep:hpel.core.steps.From = cast firstStep;
-            esb.core.Bus.from(route.interpolateUri(fromStep.uri), fromMessage -> {
-                return new Promise((resolve, reject) -> {
-                    route.execute(fromMessage).then(response -> {
-                        for (details in @:privateAccess route.routeCompletePromises) {
-                            details.resolve(response);
-                        }
-                        resolve(response);
-                    }, error -> {
-                        trace("error", error);
+            var fromUri = route.interpolateUri(fromStep.uri);
+            if (fromUri.prefix == "direct") {
+                directRoutes.set(fromUri.asEndpoint(), this);
+            } else {
+                esb.core.Bus.from(fromUri, fromMessage -> {
+                    return new Promise((resolve, reject) -> {
+                        route.execute(fromMessage).then(response -> {
+                            for (details in @:privateAccess route.routeCompletePromises) {
+                                details.resolve(response);
+                            }
+                            resolve(response);
+                        }, error -> {
+                            trace("error", error);
+                        });
                     });
                 });
-            });
+            }
         } else {
             trace(">>>>>>>>>>>>>>>>>>>>>>>>>> ERROR FIRST STEP ISNT FROM!!!");
         }
+    }
+
+    public static function executeDirect(uri:Uri, message:esb.core.Message<esb.core.bodies.RawBody>):Promise<esb.core.Message<esb.core.bodies.RawBody>> {
+        return new Promise((resolve, reject) -> {
+            var route = directRoutes.get(uri.asEndpoint());
+            if (route == null) {
+                reject("route not found");
+            } else {
+                route.route.execute(message).then(result -> {
+                    resolve(result);
+                }, error -> {
+                    reject(error);
+                });
+            }
+        });
     }
 
     private override function currentStep():hpel.core.steps.StepCommon {
