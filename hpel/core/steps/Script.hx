@@ -15,12 +15,12 @@ class Script extends StepCommon {
 
     private override function executeInternal(message:Message<RawBody>):Promise<{message:Message<RawBody>, continueBranchExecution:Bool}> {
         return new Promise((resolve, reject) -> {
-            var conditionResult = evaluate(message);
+            evaluateScript(message);
             resolve({message: message, continueBranchExecution: true} );
         });
     }
 
-    public function evaluate(message:Message<RawBody>):Bool {
+    public function evaluateScript(message:Message<RawBody>):Bool {
         var conditionResult = false;
         var headers = {};
         for (key in message.headers.keys()) {

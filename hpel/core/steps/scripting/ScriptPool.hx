@@ -1,8 +1,5 @@
 package hpel.core.steps.scripting;
 
-import esb.core.bodies.RawBody;
-import esb.core.Message;
-
 class ScriptPool {
     private static var pool:Array<IScriptProvider> = [];
 
@@ -18,31 +15,6 @@ class ScriptPool {
 
     public static function put(item:IScriptProvider) {
         pool.push(item);
-    }
-
-    public static function standardParams(message:Message<RawBody>, additional:Map<String, Any> = null):Map<String, Any> {
-        var headers = {};
-        for (key in message.headers.keys()) {
-            Reflect.setField(headers, key, message.headers.get(key));
-        }
-        var properties = {};
-        for (key in message.properties.keys()) {
-            Reflect.setField(properties, key, message.properties.get(key));
-        }
-
-        trace(Type.getClassName(Type.getClass(message.body)));
-        var map = [
-            "headers" => headers,
-            "properties" => properties,
-            "body" => message.body
-        ];
-
-        if (additional != null) {
-            for (key in additional.keys()) {
-                map.set(key, additional.get(key));
-            }
-        }
-        return map;
     }
 }
 

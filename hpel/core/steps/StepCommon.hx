@@ -1,9 +1,11 @@
 package hpel.core.steps;
 
+import hpel.core.steps.scripting.ScriptPool;
 import esb.common.Uri;
 import esb.core.bodies.RawBody;
 import promises.Promise;
 import esb.core.Message;
+import hpel.core.steps.Helpers.*;
 
 class StepCommon {
     private var children:Array<StepCommon> = [];
@@ -75,11 +77,35 @@ class StepCommon {
         });
     }
 
-    private function interpolateString(s:String):String {
-        return route().interpolateString(s);
+    private function interpolateString(s:String, message:Message<RawBody> = null):String {
+        return route().interpolateString(s, message);
+    }
+
+    private function interpolateVars(s:String, message:Message<RawBody>):Any {
+        return route().interpolateVars(s, message);
     }
 
     public function interpolateUri(uri:Uri):Uri {
         return route().interpolateUri(uri);
+    }
+
+    public function evaluate(code:EvalType, message:Message<RawBody>, defaultValue:Any = null, expectScript:Bool = true):Bool {
+        var params = standardParams(message);
+        var result = defaultValue;
+        if (code is String) {
+            code = interpolateString(code, message);
+            if (expectScript) {
+                var script = ScriptPool.get();
+                result = script.execute(code, params);
+                ScriptPool.put(script);
+            } else {
+                result = code;
+            }
+        } else if (Reflect.isFunction(code)) {
+            var fn:EvalFunction = code;
+            result = fn(params.get("body"), params.get("headers"), params.get("properties"));
+        }
+
+        return result;
     }
 }

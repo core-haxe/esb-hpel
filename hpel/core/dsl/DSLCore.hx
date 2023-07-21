@@ -13,8 +13,8 @@ extern class DSLCore {
     public function new();
     public function from(uri:Uri):DSLCore;
     public function to(uri:Uri):DSLCore;
-    public function log(message:String):DSLCore;
-    public function when(condition:String):DSLCore;
+    public function log(message:EvalType):DSLCore;
+    public function when(condition:EvalType):DSLCore;
     public function choice():DSLCore;
     public function otherwise():DSLCore;
     public function convertTo(cls:Class<RawBody>):DSLCore;
@@ -54,13 +54,13 @@ class DSLCore {
         return this;
     }
 
-    public function log(message:String):DSLCore {
+    public function log(message:EvalType):DSLCore {
         var logStep = new hpel.core.steps.Log(message);
         currentStep().addChild(logStep);
         return this;
     }
 
-    public function when(condition:String):DSLCore {
+    public function when(condition:EvalType):DSLCore {
         var whenStep = new hpel.core.steps.When(condition);
         currentStep().addChild(whenStep);
 

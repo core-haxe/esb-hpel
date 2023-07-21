@@ -10,7 +10,7 @@ class Choice extends StepCommon {
         for (c in children) {
             if (c is When) {
                 var when = cast(c, When);
-                if (when.evaluate(message)) {
+                if (evaluate(when.condition, message)) {
                     list.push(c);
                     break;
                 }
