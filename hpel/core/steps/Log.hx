@@ -1,5 +1,6 @@
 package hpel.core.steps;
 
+import hpel.core.steps.scripting.ScriptPool;
 import esb.core.bodies.RawBody;
 import esb.logging.Logger;
 import promises.Promise;
@@ -55,6 +56,9 @@ class Log extends StepCommon {
         } else if (varName.startsWith("property.")) {
             return message.properties.get(varName.split(".").pop());
         }
-        return null;
+        var script = ScriptPool.get();
+        var v = script.execute(varName, ScriptPool.standardParams(message));
+        ScriptPool.put(script);
+        return v;
     }
 }
