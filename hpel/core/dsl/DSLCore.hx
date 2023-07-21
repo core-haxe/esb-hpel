@@ -18,11 +18,11 @@ extern class DSLCore {
     public function choice():DSLCore;
     public function otherwise():DSLCore;
     public function convertTo(cls:Class<RawBody>):DSLCore;
-    public function script(data:String):DSLCore;
+    public function execute(data:EvalType):DSLCore;
     public function end():DSLCore;
     public function start():Void;
     public function process(cls:IProcess):DSLCore;
-    public function execute(handler:Message<RawBody>->Promise<Message<RawBody>>):DSLCore;
+    public function call(handler:Message<RawBody>->Promise<Message<RawBody>>):DSLCore;
     public function body(value:String, convertTo:Class<RawBody> = null):DSLCore;
     public function property(name:String, value:Any):DSLCore;
     public function header(name:String, value:Any):DSLCore;
@@ -96,9 +96,9 @@ class DSLCore {
         return this;
     }
 
-    public function script(data:String):DSLCore {
-        var scriptStep = new hpel.core.steps.Script(data);
-        currentStep().addChild(scriptStep);
+    public function execute(data:EvalType):DSLCore {
+        var executeStep = new hpel.core.steps.Execute(data);
+        currentStep().addChild(executeStep);
         return this;
     }
 
@@ -108,9 +108,9 @@ class DSLCore {
         return this;
     }
 
-    public function execute(handler:Message<RawBody>->Promise<Message<RawBody>>):DSLCore {
-        var executeStep = new hpel.core.steps.Execute(handler);
-        currentStep().addChild(executeStep);
+    public function call(handler:Message<RawBody>->Promise<Message<RawBody>>):DSLCore {
+        var callStep = new hpel.core.steps.Call(handler);
+        currentStep().addChild(callStep);
         return this;
     }
 
