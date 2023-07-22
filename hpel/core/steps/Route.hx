@@ -12,6 +12,8 @@ using StringTools;
 class Route extends StepCommon {
     private var context:RouteContext;
 
+    private var cachedMessage:Message<RawBody> = null;
+
     public function new(context:RouteContext) {
         super();
         this.context = context;

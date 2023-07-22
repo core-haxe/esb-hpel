@@ -18,7 +18,7 @@ extern class DSLCore {
     public function choice():DSLCore;
     public function otherwise():DSLCore;
     public function convertTo(cls:Class<RawBody>):DSLCore;
-    public function execute(data:EvalType):DSLCore;
+    public function execute(data:EvalType, setBody:Bool = true):DSLCore;
     public function end():DSLCore;
     public function start():Void;
     public function process(cls:IProcess):DSLCore;
@@ -26,6 +26,8 @@ extern class DSLCore {
     public function body(value:String, convertTo:Class<RawBody> = null):DSLCore;
     public function property(name:String, value:Any):DSLCore;
     public function header(name:String, value:Any):DSLCore;
+    public function cacheBody():DSLCore;
+    public function restoreBody():DSLCore;
 }
 
 #else
@@ -96,8 +98,8 @@ class DSLCore {
         return this;
     }
 
-    public function execute(data:EvalType):DSLCore {
-        var executeStep = new hpel.core.steps.Execute(data);
+    public function execute(data:EvalType, setBody:Bool = true):DSLCore {
+        var executeStep = new hpel.core.steps.Execute(data, setBody);
         currentStep().addChild(executeStep);
         return this;
     }
@@ -129,6 +131,18 @@ class DSLCore {
     public function header(name:String, value:Any):DSLCore {
         var headerStep = new hpel.core.steps.Header(name, value);
         currentStep().addChild(headerStep);
+        return this;
+    }
+
+    public function cacheBody():DSLCore {
+        var cacheBodyStep = new hpel.core.steps.CacheBody();
+        currentStep().addChild(cacheBodyStep);
+        return this;
+    }
+
+    public function restoreBody():DSLCore {
+        var restoreBodyStep = new hpel.core.steps.RestoreBody();
+        currentStep().addChild(restoreBodyStep);
         return this;
     }
 
