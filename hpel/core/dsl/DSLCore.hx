@@ -28,6 +28,8 @@ extern class DSLCore {
     public function header(name:String, value:Any):DSLCore;
     public function cacheBody():DSLCore;
     public function restoreBody():DSLCore;
+    public function loop(items:EvalType, sequential:Bool = false):DSLCore;
+    public function wait(amount:Int):DSLCore;
 }
 
 #else
@@ -143,6 +145,22 @@ class DSLCore {
     public function restoreBody():DSLCore {
         var restoreBodyStep = new hpel.core.steps.RestoreBody();
         currentStep().addChild(restoreBodyStep);
+        return this;
+    }
+
+    public function loop(items:EvalType, sequential:Bool = false):DSLCore {
+        var loopStep = new hpel.core.steps.Loop(items, sequential);
+        currentStep().addChild(loopStep);
+
+        var branch = new DSLCore();
+        branch._currentStep = loopStep;
+        branch._parentDSL = this;
+        return branch;
+    }
+
+    public function wait(amount:Int):DSLCore {
+        var waitStep = new hpel.core.steps.Wait(amount);
+        currentStep().addChild(waitStep);
         return this;
     }
 

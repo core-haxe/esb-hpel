@@ -20,4 +20,9 @@ class Header extends StepCommon {
             resolve({message: message, continueBranchExecution: true} );
         });
     }
+
+    private override function cloneSelf():Header {
+        var c = new Header(this.name, this.value);
+        return c;
+    }
 }

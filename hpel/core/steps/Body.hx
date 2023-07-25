@@ -26,4 +26,9 @@ class Body extends StepCommon {
             resolve({message: newMessage, continueBranchExecution: true} );
         });
     }
+
+    private override function cloneSelf():Body {
+        var c = new Body(this.value, this.convertTo);
+        return c;
+    }
 }

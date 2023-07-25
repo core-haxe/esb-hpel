@@ -19,4 +19,9 @@ class ConvertTo extends StepCommon {
             resolve({message: newMessage, continueBranchExecution: true} );
         });
     }
+
+    private override function cloneSelf():ConvertTo {
+        var c = new ConvertTo(this.cls);
+        return c;
+    }
 }

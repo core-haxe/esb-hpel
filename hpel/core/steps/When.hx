@@ -18,4 +18,9 @@ class When extends StepCommon {
             resolve({message: message, continueBranchExecution: conditionResult} );
         });
     }
+
+    private override function cloneSelf():When {
+        var c = new When(this.condition);
+        return c;
+    }
 }

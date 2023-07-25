@@ -20,4 +20,9 @@ class Property extends StepCommon {
             resolve({message: message, continueBranchExecution: true} );
         });
     }
+
+    private override function cloneSelf():Property {
+        var c = new Property(this.name, this.value);
+        return c;
+    }
 }

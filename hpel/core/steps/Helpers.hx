@@ -14,7 +14,6 @@ class Helpers {
             Reflect.setField(properties, key, message.properties.get(key));
         }
 
-        trace(Type.getClassName(Type.getClass(message.body)));
         var map = [
             "headers" => headers,
             "properties" => properties,

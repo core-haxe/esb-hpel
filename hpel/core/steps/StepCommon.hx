@@ -13,6 +13,8 @@ class StepCommon {
 
     private var log:esb.logging.Logger = new esb.logging.Logger("hpel.core.steps");
 
+    private var varMap:Map<String, Any> = [];
+
     public function new() {
     } 
 
@@ -34,6 +36,46 @@ class StepCommon {
             ref = ref.parentStep;
         }
         return null;
+    }
+
+    private function cloneSelf():StepCommon {
+        return new StepCommon();
+    }
+
+    public function clone():StepCommon {
+        var c = cloneSelf();
+        c.parentStep = this.parentStep;
+        c.varMap = this.varMap.copy();
+        for (child in this.children) {
+            c.children.push(child.clone());
+        }
+        return c;
+    }
+
+    public function variables():Map<String, Any> {
+        var finalMap:Map<String, Any> = [];
+        var stack = [];
+        var ref = this;
+        while (ref != null) {
+            stack.push(ref);
+            ref = ref.parentStep;
+        }
+        stack.reverse();
+        for (item in stack) {
+            for (key in item.varMap.keys()) {
+                var v = item.varMap.get(key);
+                finalMap.set(key, v);
+            }
+        }
+        return finalMap;
+    }
+
+    public function variable(name:String, value:Any = null):Any {
+        if (value == null) { // getter
+            return variables().get(name);
+        }
+        varMap.set(name, value);
+        return value;
     }
 
     private function executeInternal(message:Message<RawBody>):Promise<{message:Message<RawBody>, continueBranchExecution:Bool}> {
@@ -62,38 +104,48 @@ class StepCommon {
         });
     }
 
-    private function executeChildren(list:Array<StepCommon>, message:Message<RawBody>, cb:Message<RawBody>->Void) {
+    private function executeChildren(list:Array<StepCommon>, message:Message<RawBody>, cb:Message<RawBody>->Void, vars:Map<String, Any> = null) {
         if (list.length == 0) {
             cb(message);
             return;
         }
 
         var item = list.shift();
-        item.execute(message).then(result -> {
-            executeChildren(list, result, cb);
+        if (vars != null) {
+            for (key in vars.keys()) {
+                item.variable(key, vars.get(key));
+            }
+        }
+
+        executeChild(item, message).then(result -> {
+            executeChildren(list, result, cb, vars);
         }, error -> {
             trace("--------------------> error", error, Type.getClassName(Type.getClass(this)), Type.getClassName(Type.getClass(item)));
-            executeChildren(list, message, cb);
+            executeChildren(list, message, cb, vars);
         });
     }
 
-    private function interpolateString(s:String, message:Message<RawBody> = null):String {
-        return route().interpolateString(s, message);
+    private function executeChild(child:StepCommon, message:Message<RawBody>):Promise<Message<RawBody>> {
+        return child.execute(message);
     }
 
-    private function interpolateVars(s:String, message:Message<RawBody>):Any {
-        return route().interpolateVars(s, message);
+    private function interpolateString(s:String, message:Message<RawBody> = null, vars:Map<String, Any> = null):String {
+        return route().interpolateString(s, message, vars);
     }
 
-    public function interpolateUri(uri:Uri):Uri {
-        return route().interpolateUri(uri);
+    private function interpolateVars(s:String, message:Message<RawBody>, vars:Map<String, Any> = null):Any {
+        return route().interpolateVars(s, message, vars);
     }
 
-    public function evaluate(code:EvalType, message:Message<RawBody>, defaultValue:Any = null, expectScript:Bool = true):Bool {
-        var params = standardParams(message);
+    public function interpolateUri(uri:Uri, vars:Map<String, Any> = null):Uri {
+        return route().interpolateUri(uri, vars);
+    }
+
+    public function evaluate(code:EvalType, message:Message<RawBody>, defaultValue:Any = null, expectScript:Bool = true):Any {
+        var params = standardParams(message, variables());
         var result = defaultValue;
         if (code is String) {
-            code = interpolateString(code, message);
+            code = interpolateString(code, message, variables());
             if (expectScript) {
                 var script = ScriptPool.get();
                 result = script.execute(code, params);

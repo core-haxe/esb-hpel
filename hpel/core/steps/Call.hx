@@ -21,4 +21,9 @@ class Call extends StepCommon {
             });
         });
     }
+
+    private override function cloneSelf():Call {
+        var c = new Call(this.handler);
+        return c;
+    }
 }

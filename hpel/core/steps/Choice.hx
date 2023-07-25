@@ -25,4 +25,9 @@ class Choice extends StepCommon {
 
         return list;
     }
+
+    private override function cloneSelf():Choice {
+        var c = new Choice();
+        return c;
+    }
 }

@@ -16,4 +16,9 @@ class RestoreBody extends StepCommon {
             resolve({message: newMessage, continueBranchExecution: true} );
         });
     }
+
+    private override function cloneSelf():RestoreBody {
+        var c = new RestoreBody();
+        return c;
+    }
 }

@@ -18,4 +18,9 @@ class From extends StepCommon {
             hpelResolve({message: message, continueBranchExecution: true});
         });
     }
+
+    private override function cloneSelf():From {
+        var c = new From(this.uri);
+        return c;
+    }
 }

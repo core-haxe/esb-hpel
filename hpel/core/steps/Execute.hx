@@ -32,4 +32,9 @@ class Execute extends StepCommon {
             resolve({message: newMessage, continueBranchExecution: true} );
         });
     }
+
+    private override function cloneSelf():Execute {
+        var c = new Execute(this.code, this.setBody);
+        return c;
+    }
 }

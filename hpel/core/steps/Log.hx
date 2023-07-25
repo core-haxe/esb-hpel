@@ -37,4 +37,9 @@ class Log extends StepCommon {
             resolve({message: message, continueBranchExecution: true} );
         });
     }
+
+    private override function cloneSelf():Log {
+        var c = new Log(this.message, this.ref);
+        return c;
+    }
 }

@@ -21,4 +21,9 @@ class Process extends StepCommon {
             });
         });
     }
+
+    private override function cloneSelf():Process {
+        var c = new Process(this.process);
+        return c;
+    }
 }

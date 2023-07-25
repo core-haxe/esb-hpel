@@ -16,7 +16,7 @@ class To extends StepCommon {
 
     private override function executeInternal(message:Message<RawBody>):Promise<{message:Message<RawBody>, continueBranchExecution:Bool}> {
         return new Promise((hpelResolve, hpelReject) -> {
-            var toUri = interpolateUri(uri);
+            var toUri = interpolateUri(uri, variables());
             if (toUri.prefix == "direct") {
                 hpel.core.dsl.Route.executeDirect(toUri, message).then(result -> {
                     hpelResolve({message: result, continueBranchExecution: true});
@@ -25,7 +25,9 @@ class To extends StepCommon {
                     hpelReject(error);
                 });
             } else {
+                var originalCorrelationId = message.correlationId;
                 Bus.to(toUri, message).then(result -> {
+                    result.correlationId = originalCorrelationId;
                     hpelResolve({message: result, continueBranchExecution: true});
                 }, error -> {
                     trace("error", error);
@@ -33,5 +35,10 @@ class To extends StepCommon {
                 });
             }
         });
+    }
+
+    private override function cloneSelf():To {
+        var c = new To(this.uri);
+        return c;
     }
 }

@@ -11,4 +11,9 @@ class CacheBody extends StepCommon {
             resolve({message: message, continueBranchExecution: true} );
         });
     }
+
+    private override function cloneSelf():CacheBody {
+        var c = new CacheBody();
+        return c;
+    }
 }

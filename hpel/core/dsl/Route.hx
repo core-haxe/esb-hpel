@@ -35,7 +35,7 @@ class Route extends DSLCore {
             if (fromUri.prefix == "direct") {
                 directRoutes.set(fromUri.asEndpoint(), this);
             } else {
-                esb.core.Bus.from(fromUri, fromMessage -> {
+                esb.core.Bus.from(fromUri, (fromUri, fromMessage) -> {
                     return new Promise((resolve, reject) -> {
                         route.execute(fromMessage).then(response -> {
                             for (details in @:privateAccess route.routeCompletePromises) {
