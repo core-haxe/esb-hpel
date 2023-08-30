@@ -73,13 +73,13 @@ class Route extends StepCommon {
         return v;
     }
 
-    public override function interpolateUri(uri:Uri, vars:Map<String, Any> = null):Uri {
+    public override function interpolateUri(uri:Uri, message:Message<RawBody>, vars:Map<String, Any> = null):Uri {
         var s = uri.toString();
         if (s.contains("{{") && s.contains("}}")) {
-            s = interpolateString(s, vars);
+            s = interpolateString(s, message, vars);
         }
         if (s.contains("${") && s.contains("}")) {
-            s = interpolateVars(s, null, vars);
+            s = interpolateVars(s, message, vars);
         }
         return Uri.fromString(s);
     }

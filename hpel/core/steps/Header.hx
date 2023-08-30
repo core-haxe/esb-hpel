@@ -6,9 +6,9 @@ import esb.core.Message;
 
 class Header extends StepCommon {
     public var name:String;
-    public var value:Any;
+    public var value:EvalType;
 
-    public function new(name:String, value:Any) {
+    public function new(name:String, value:EvalType) {
         super();
         this.name = name;
         this.value = value;
@@ -16,7 +16,8 @@ class Header extends StepCommon {
 
     private override function executeInternal(message:Message<RawBody>):Promise<{message:Message<RawBody>, continueBranchExecution:Bool}> {
         return new Promise((resolve, reject) -> {
-            message.headers.set(this.name, this.value);
+            var finalValue = evaluate(this.value, message, null, false);
+            message.headers.set(this.name, finalValue);
             resolve({message: message, continueBranchExecution: true} );
         });
     }

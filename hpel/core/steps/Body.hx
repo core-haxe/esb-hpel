@@ -7,10 +7,10 @@ import esb.core.bodies.RawBody;
 import esb.core.Message;
 
 class Body extends StepCommon {
-    public var value:String;
+    public var value:EvalType;
     public var convertTo:Class<RawBody>;
 
-    public function new(value:String, convertTo:Class<RawBody> = null) {
+    public function new(value:EvalType, convertTo:Class<RawBody> = null) {
         super();
         this.value = value;
         this.convertTo = convertTo;
@@ -20,9 +20,23 @@ class Body extends StepCommon {
         return new Promise((resolve, reject) -> {
             var newMessage = message;
             if (convertTo != null) {
-                newMessage = Bus.convertMessage(message, this.convertTo);
+                newMessage = Bus.convertMessage(message, this.convertTo, false);
             }
-            newMessage.body.fromBytes(Bytes.ofString(value));
+            var finalValue = evaluate(this.value, message, null, false);
+            var isMessageBody = Bus.isMessageBody(finalValue);
+            var stringValue:String = null;
+            if (isMessageBody && this.convertTo == null) {
+                var resultBodyType = Type.getClassName(Type.getClass(finalValue));
+                if (newMessage.bodyType != resultBodyType) {
+                    newMessage = Bus.convertMessage(message, Type.getClass(finalValue), false);
+                }
+                stringValue = Std.string(finalValue);
+            } else {
+                stringValue = Std.string(finalValue);
+            }
+            if (stringValue != null) {
+                newMessage.body.fromBytes(Bytes.ofString(stringValue));
+            }
             resolve({message: newMessage, continueBranchExecution: true} );
         });
     }

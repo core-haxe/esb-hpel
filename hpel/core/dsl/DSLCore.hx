@@ -12,20 +12,22 @@ import esb.common.Uri;
 extern class DSLCore {    
     public function new();
     public function from(uri:Uri):DSLCore;
-    public function to(uri:Uri):DSLCore;
+    public function to(uri:Uri, variableName:String = null):DSLCore;
     public function log(message:EvalType):DSLCore;
     public function when(condition:EvalType):DSLCore;
     public function choice():DSLCore;
     public function otherwise():DSLCore;
     public function convertTo(cls:Class<RawBody>):DSLCore;
+    public function createMessage(cls:Class<RawBody>, variableName:String = null):DSLCore;
     public function execute(data:EvalType, setBody:Bool = true):DSLCore;
     public function end():DSLCore;
     public function start():Void;
     public function process(cls:IProcess):DSLCore;
     public function call(handler:Message<RawBody>->Promise<Message<RawBody>>):DSLCore;
-    public function body(value:String, convertTo:Class<RawBody> = null):DSLCore;
-    public function property(name:String, value:Any):DSLCore;
-    public function header(name:String, value:Any):DSLCore;
+    public function body(value:EvalType, convertTo:Class<RawBody> = null):DSLCore;
+    public function property(name:String, value:EvalType):DSLCore;
+    public function header(name:String, value:EvalType):DSLCore;
+    public function variable(name:String, value:EvalType):DSLCore;
     public function cacheBody():DSLCore;
     public function restoreBody():DSLCore;
     public function loop(items:EvalType, sequential:Bool = false):DSLCore;
@@ -52,8 +54,8 @@ class DSLCore {
         return this;
     }
 
-    public function to(uri:Uri):DSLCore {
-        var toStep = new hpel.core.steps.To(uri);
+    public function to(uri:Uri, variableName:String = null):DSLCore {
+        var toStep = new hpel.core.steps.To(uri, variableName);
         currentStep().addChild(toStep);
         return this;
     }
@@ -100,6 +102,12 @@ class DSLCore {
         return this;
     }
 
+    public function createMessage(cls:Class<RawBody>, variableName:String = null):DSLCore {
+        var createMessageStep = new hpel.core.steps.CreateMessage(cls, variableName);
+        currentStep().addChild(createMessageStep);
+        return this;
+    }
+
     public function execute(data:EvalType, setBody:Bool = true):DSLCore {
         var executeStep = new hpel.core.steps.Execute(data, setBody);
         currentStep().addChild(executeStep);
@@ -118,19 +126,25 @@ class DSLCore {
         return this;
     }
 
-    public function body(value:String, convertTo:Class<RawBody> = null):DSLCore {
+    public function body(value:EvalType, convertTo:Class<RawBody> = null):DSLCore {
         var bodyStep = new hpel.core.steps.Body(value, convertTo);
         currentStep().addChild(bodyStep);
         return this;
     }
 
-    public function property(name:String, value:Any):DSLCore {
+    public function property(name:String, value:EvalType):DSLCore {
         var propertyStep = new hpel.core.steps.Property(name, value);
         currentStep().addChild(propertyStep);
         return this;
     }
 
-    public function header(name:String, value:Any):DSLCore {
+    public function variable(name:String, value:EvalType):DSLCore {
+        var variableStep = new hpel.core.steps.Variable(name, value);
+        currentStep().addChild(variableStep);
+        return this;
+    }
+
+    public function header(name:String, value:EvalType):DSLCore {
         var headerStep = new hpel.core.steps.Header(name, value);
         currentStep().addChild(headerStep);
         return this;

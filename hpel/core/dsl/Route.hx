@@ -31,7 +31,7 @@ class Route extends DSLCore {
         var firstStep = @:privateAccess route.children[0];
         if (firstStep is hpel.core.steps.From) {
             var fromStep:hpel.core.steps.From = cast firstStep;
-            var fromUri = route.interpolateUri(fromStep.uri);
+            var fromUri = route.interpolateUri(fromStep.uri, null);
             if (fromUri.prefix == "direct") {
                 directRoutes.set(fromUri.asEndpoint(), this);
             } else {

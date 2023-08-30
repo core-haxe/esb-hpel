@@ -137,8 +137,8 @@ class StepCommon {
         return route().interpolateVars(s, message, vars);
     }
 
-    public function interpolateUri(uri:Uri, vars:Map<String, Any> = null):Uri {
-        return route().interpolateUri(uri, vars);
+    public function interpolateUri(uri:Uri, message:Message<RawBody>, vars:Map<String, Any> = null):Uri {
+        return route().interpolateUri(uri, message, vars);
     }
 
     public function evaluate(code:EvalType, message:Message<RawBody>, defaultValue:Any = null, expectScript:Bool = true):Any {
@@ -155,7 +155,14 @@ class StepCommon {
             }
         } else if (Reflect.isFunction(code)) {
             var fn:EvalFunction = code;
-            result = fn(params.get("body"), params.get("headers"), params.get("properties"));
+            var vars:Dynamic = {};
+            for (key in params.keys()) {
+                if (key == "body" || key == "headers" || key == "properties") {
+                    continue;
+                }
+                Reflect.setField(vars, key, params.get(key));
+            }
+            result = fn(params.get("body"), params.get("headers"), params.get("properties"), vars);
         }
 
         return result;
