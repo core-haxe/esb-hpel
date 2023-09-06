@@ -133,7 +133,7 @@ class StepCommon {
         return route().interpolateString(s, message, vars);
     }
 
-    private function interpolateVars(s:String, message:Message<RawBody>, vars:Map<String, Any> = null):Any {
+    private function interpolateVars(s:String, message:Message<RawBody>, vars:Map<String, Any> = null):String {
         return route().interpolateVars(s, message, vars);
     }
 
