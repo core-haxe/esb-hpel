@@ -27,6 +27,11 @@ class Loop extends StepCommon {
                     }
                 case TClass(Array):
                     itemsArray = itemsResult;
+                case TClass(List) | TClass(haxe.ds.List):    
+                    var itemsList:List<Any> = cast itemsResult;
+                    for (item in itemsList) {
+                        itemsArray.push(item);
+                    }
                 case _:
                     trace(">>>>>>>>>>>>>>>>>>>>>>>>>>> UNKOWN LOOP ITEMS: ", Type.typeof(itemsResult));
             }
