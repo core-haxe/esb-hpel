@@ -15,12 +15,33 @@ class Route extends StepCommon {
     private var cachedMessage:Message<RawBody> = null;
     private var stepIdCounters:Map<String, Int> = [];
 
+    public var auditors:Array<IAuditor> = [];
+
     public function new(context:RouteContext) {
         super();
         this.context = context;
+        stepId = this.context.id;
     }
 
     private var routeCompletePromises:Array<{resolve:Dynamic, reject:Dynamic}> = [];
+
+    public function auditStepStart(step:StepCommon, message:Message<RawBody>) {
+        for (auditor in auditors) {
+            auditor.auditStepStart(step, message);
+        }
+    }
+
+    public function auditStepEnd(step:StepCommon, message:Message<RawBody>) {
+        for (auditor in auditors) {
+            auditor.auditStepEnd(step, message);
+        }
+    }
+
+    public function auditStepError(step:StepCommon, message:Message<RawBody>, error:Dynamic) {
+        for (auditor in auditors) {
+            auditor.auditStepError(step, message, error);
+        }
+    }
 
     public function generateStepId(instance:StepCommon):String {
         var className = Type.getClassName(Type.getClass(instance));

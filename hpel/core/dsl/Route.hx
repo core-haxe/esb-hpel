@@ -1,5 +1,6 @@
 package hpel.core.dsl;
 
+import esb.common.Uuid;
 import esb.common.Uri;
 import promises.Promise;
 
@@ -37,6 +38,9 @@ class Route extends DSLCore {
             } else {
                 esb.core.Bus.from(fromUri, (fromUri, fromMessage) -> {
                     return new Promise((resolve, reject) -> {
+                        if (!fromMessage.properties.exists("breadcrumbId")) {
+                            fromMessage.properties.set("breadcrumbId", Uuid.generate());
+                        }
                         route.execute(fromMessage).then(response -> {
                             for (details in @:privateAccess route.routeCompletePromises) {
                                 details.resolve(response);

@@ -50,6 +50,7 @@ class StepCommon {
         var c = cloneSelf();
         c.parentStep = this.parentStep;
         c.varMap = this.varMap.copy();
+        c.stepId = this.stepId;
         for (child in this.children) {
             c.children.push(child.clone());
         }
@@ -91,11 +92,13 @@ class StepCommon {
     public function execute(message:Message<RawBody>):Promise<Message<RawBody>> {
         return new Promise((resolve, reject) -> {
             //log.info('executing step ${Type.getClassName(Type.getClass(this))}');
+            route().auditStepStart(this, message);
             executeInternal(message).then(result -> {
                 if (result.continueBranchExecution) {
                     //log.info('step ${Type.getClassName(Type.getClass(this))} complete, continuing branch execution');
                     var copy = effectiveChildren(result.message).copy();
                     executeChildren(copy, result.message, (outMessage) -> {
+                        route().auditStepEnd(this, outMessage);
                         resolve(outMessage);
                     });
                 } else {
@@ -103,6 +106,7 @@ class StepCommon {
                     resolve(result.message);
                 }
             }, error -> {
+                route().auditStepError(this, message, error);
                 reject(error);
             });
         });
