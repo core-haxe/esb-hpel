@@ -10,9 +10,10 @@ import hpel.core.steps.Helpers.*;
 using StringTools;
 
 class Route extends StepCommon {
-    private var context:RouteContext;
+    public var context:RouteContext;
 
     private var cachedMessage:Message<RawBody> = null;
+    private var stepIdCounters:Map<String, Int> = [];
 
     public function new(context:RouteContext) {
         super();
@@ -20,6 +21,19 @@ class Route extends StepCommon {
     }
 
     private var routeCompletePromises:Array<{resolve:Dynamic, reject:Dynamic}> = [];
+
+    public function generateStepId(instance:StepCommon):String {
+        var className = Type.getClassName(Type.getClass(instance));
+        var counter = -1;
+        if (stepIdCounters.exists(className)) {
+            counter = stepIdCounters.get(className);
+        }
+        counter++;
+        stepIdCounters.set(className, counter);
+
+        var name = className.split(".").pop().toLowerCase();
+        return name + "-" + counter;
+    }
 
     private static var regProperties = new EReg("\\{\\{(.*?)\\}\\}", "gm");
     public override function interpolateString(s:String, message:Message<RawBody> = null, vars:Map<String, Any> = null):String {

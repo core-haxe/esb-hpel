@@ -10,6 +10,7 @@ import hpel.core.steps.Helpers.*;
 class StepCommon {
     private var children:Array<StepCommon> = [];
     private var parentStep:StepCommon;
+    public var stepId:String;
 
     private var log:esb.logging.Logger = new esb.logging.Logger("hpel.core.steps");
 
@@ -20,6 +21,9 @@ class StepCommon {
 
     public function addChild(step:StepCommon) {
         step.parentStep = this;
+        if (step.stepId == null) {
+            step.stepId = route().generateStepId(step);
+        }
         children.push(step);
     }
 
