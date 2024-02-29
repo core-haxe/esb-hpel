@@ -12,10 +12,10 @@
                 </dependencies>
                 <class-paths>
                     <class-path>.</class-path>
-                    <class-path>${rootDir}/esb/common/esb-common</class-path>
-                    <class-path>${rootDir}/esb/core/esb-core</class-path>
-                    <class-path>${rootDir}/esb/core/esb-logging</class-path>
-                    <class-path>${rootDir}/esb/core/esb-config</class-path>
+                    <class-path>${esbDir}/common/esb-common</class-path>
+                    <class-path>${esbDir}/core/esb-core</class-path>
+                    <class-path>${esbDir}/core/esb-logging</class-path>
+                    <class-path>${esbDir}/core/esb-config</class-path>
                 </class-paths>
                 <compiler-args>
                     <compiler-arg>--macro include('hpel.core')</compiler-arg>
