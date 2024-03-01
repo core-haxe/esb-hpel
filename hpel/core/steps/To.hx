@@ -19,33 +19,19 @@ class To extends StepCommon {
     private override function executeInternal(message:Message<RawBody>):Promise<{message:Message<RawBody>, continueBranchExecution:Bool}> {
         return new Promise((hpelResolve, hpelReject) -> {
             var toUri = interpolateUri(uri, message, variables());
-            if (toUri.prefix == "direct") {
-                hpel.core.dsl.Route.executeDirect(toUri, message).then(result -> {
-                    var finalResult = result;
-                    if (this.variableName != null) {
-                        route().variable(this.variableName, result);
-                        finalResult = message;
-                    }
-                    hpelResolve({message: finalResult, continueBranchExecution: true});
-                }, error -> {
-                    trace("error", error);
-                    hpelReject(error);
-                });
-            } else {
-                var originalCorrelationId = message.correlationId;
-                Bus.to(toUri, message).then(result -> {
-                    result.correlationId = originalCorrelationId;
-                    var finalResult = result;
-                    if (this.variableName != null) {
-                        route().variable(this.variableName, result);
-                        finalResult = message;
-                    }
-                    hpelResolve({message: finalResult, continueBranchExecution: true});
-                }, error -> {
-                    trace("error", error);
-                    hpelReject(error);
-                });
-            }
+            var originalCorrelationId = message.correlationId;
+            Bus.to(toUri, message).then(result -> {
+                result.correlationId = originalCorrelationId;
+                var finalResult = result;
+                if (this.variableName != null) {
+                    route().variable(this.variableName, result);
+                    finalResult = message;
+                }
+                hpelResolve({message: finalResult, continueBranchExecution: true});
+            }, error -> {
+                trace("error", error);
+                hpelReject(error);
+            });
         });
     }
 
